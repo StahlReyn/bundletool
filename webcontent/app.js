@@ -94,7 +94,7 @@ async function s2(p) {
 
     jobDecisions.plugins = await processPluginOptions(modJson, jobs.plugins);
 
-    await performBundle(modJson, jobDecisions, base, p);
+    await performBundle(modJson, jobDecisions, base, p, jobs.plugins);
 }
 
 function s1(p) {

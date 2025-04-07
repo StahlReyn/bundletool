@@ -23,14 +23,28 @@ export async function comparePlugins(gameBase, playtestBase) {
     setProgressBar(0, 1);
     await forceYield();
 
-    let data = fs.readFileSync(path.join(gameBase, "js/plugins.js"), "utf-8");
+    let data = fs.readFileSync(path.join(gameBase, "js/plugins.js"), "utf-8").replace(/\r\n/g, '\n');
     let x = eval(`${data.split("\nvar $plugins =\n")[1]}`);
     let baseGame = x;
-    data = fs.readFileSync(path.join(playtestBase, "js/plugins.js"), "utf-8");
+    data = fs.readFileSync(path.join(playtestBase, "js/plugins.js"), "utf-8").replace(/\r\n/g, '\n');
     x = eval(`${data.split("\nvar $plugins =\n")[1]}`);
     let playtest = x;
 
     baseGame = baseGame.filter(a => a.status);
+
+    let onemakerCorePlugin = playtest.find(a => a.name.toLowerCase() === "onemakermv-core");
+    let onemakerCorePluginWeight = 0;
+
+    if (onemakerCorePlugin) {
+        let corePluginData = fs.readFileSync(path.join(playtestBase, "js/plugins", onemakerCorePlugin.name + ".js"), "utf-8").replace(/\r\n/g, '\n');
+        let line = corePluginData.split("\n").filter(a => a.startsWith("//onemaker-bundletool-special:"));
+        if (line.length > 0) {
+            onemakerCorePluginWeight = parseInt(line[0].split(": ")[1]);
+        } else {
+            onemakerCorePlugin = null;
+        }
+    }
+
     playtest = playtest.filter(a => a.status);
     playtest = playtest.filter(a => a.name !== "YEP_Debugger");
     playtest = playtest.filter(a => a.name !== "YEP_TestPlayAssist");
@@ -59,6 +73,8 @@ export async function comparePlugins(gameBase, playtestBase) {
                 changedFiles.push(a.name);
             }
         } else {
+            if (a.name.toLowerCase() === "onemakermv-core") continue;
+
             newFiles.push(a.name);
             let diff = compare({}, a.parameters);
             if (diff.length > 0) {
@@ -71,6 +87,6 @@ export async function comparePlugins(gameBase, playtestBase) {
 
 
     return {
-        changedFiles, newFiles, prefChanges
+        changedFiles, newFiles, prefChanges, onemakerCorePlugin, onemakerCorePluginWeight
     };
 }

@@ -4,6 +4,10 @@ export async function processPluginOptions(modJson, job) {
     let pluginDecisions, pluginPrefDecisions;
     if (job.changedFiles.length > 0 || job.newFiles.length > 0) {
         pluginDecisions = await doPrompt("What to do with plugin files?",[
+            ...(job.onemakerCorePlugin ? [
+                [1, "Mandatory for your project"],
+                [0, 1, job.onemakerCorePlugin.name, [1]]
+            ] : []),
             ...(job.changedFiles.length > 0 ? [[1, "Edited game plugins"]] : []),
             ...job.changedFiles.map(value => ([0, 0, value, [0,2]])),
             ...(job.newFiles.length > 0 ? [[1, "New plugins"]] : []),

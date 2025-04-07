@@ -75,6 +75,11 @@ export function doPrompt(title, options, optionTitles) {
                         checkboxes[optId].push(el);
 
                         holderDiv.appendChild(el);
+
+                        if (options.length === 1) {
+                            retval[text] = options[0];
+                            el.checked = true;
+                        }
                     } else {
                         holderDiv.classList.add("noop");
                     }

@@ -53,7 +53,7 @@ function imgToCanvas(img) {
     return ctx;
 }
 
-export async function performBundle(modJson, jobDecisions, gameBase, playtestBase) {
+export async function performBundle(modJson, jobDecisions, gameBase, playtestBase, pluginJob) {
     const tmpBase = path.join(gameBase, "..", ".bundletool_temporary");
     setJobTitle("Building the mod...");
     setSubtitle("");
@@ -84,6 +84,11 @@ export async function performBundle(modJson, jobDecisions, gameBase, playtestBas
 
     await forceYield();
     
+    if (pluginJob.onemakerCorePlugin) {
+        modJson.plugins_ordered = {
+            [`_bt_uniq_${modJson.id.toLowerCase()}_onemakermv-core`]: {"at": 0, "weight": pluginJob.onemakerCorePluginWeight}
+        };
+    }
     let done = 0;
     for (let pluginPath in jobDecisions.plugins.pluginDecisions) {
         let decision = jobDecisions.plugins.pluginDecisions[pluginPath];
